@@ -33,3 +33,7 @@ def download_specieslink():
         i = i + 1
         start = limits + 1
         limits = (start + increment) - 1
+
+
+def load_parquet(conn, local_file):
+    pass
