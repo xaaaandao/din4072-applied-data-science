@@ -1,8 +1,9 @@
+import os
 import requests
 
-def make_requests(base_url):
+def make_requests(base_url, headers={}):
     try:
-        response = requests.get(base_url)
+        response = requests.get(base_url, headers=headers)
         if response.status_code == 200:
             j = response.json()
             if len(j) > 0:
