@@ -23,8 +23,8 @@ df = pd.read_csv("species_south_america.csv")
 resultados = []
 
 for idx, row in df.iterrows():
-    # print(row["species"])
-    base_url = "https://powo.science.kew.org/results?q=%s" % row["species"]
+    # print(row["scientificName"])
+    base_url = "https://powo.science.kew.org/results?q=%s" % row["scientificName"]
     print("base_url %s" % base_url)
     
     try: 
@@ -57,6 +57,27 @@ for idx, row in df.iterrows():
             html_detail = driver.page_source
             detail = Selector(text=html_detail)
 
+
+            status_species = None
+            native_range_text = None
+
+            # Captura o status da espécie (ex.: "This species is accepted")
+            # status_species = detail.xpath('//p[contains(text(), "This species is")]/text()').get()
+            status_species = detail.xpath('//text()[contains(., "This species is")]').get()
+            if status_species:
+                status_species = status_species.strip()
+                print(f"      Status taxonômico: {status_species}")
+            else:
+                print("      ⚠️ Status taxonômico não encontrado")
+
+            # Captura a descrição da faixa nativa (ex.: "The native range of this species is ...")
+            # native_range_text = detail.xpath('//p[contains(text(), "The native range of this species")]/text()').get()
+            native_range_text = detail.xpath('//text()[contains(., "The native range of this species")]').get()
+            if native_range_text:
+                native_range_text = native_range_text.strip()
+                print(f"      Faixa nativa: {native_range_text}")
+            else:
+                print("      ⚠️ Faixa nativa não encontrada")
             # Campos com verificação de existência
 
             nome_page = detail.xpath('/html/body/div[3]/main/div[1]/div[1]/div/h1/text()').get()
@@ -182,7 +203,7 @@ for idx, row in df.iterrows():
 
 
             resultados.append({
-                'species': row["species"],
+                'species': row["scientificName"],
                 'name': name,
                 'url': href,
                 'publicacao': publicacao if publicacao else '',
@@ -190,11 +211,14 @@ for idx, row in df.iterrows():
                 'native_countries_count': len(native_countries),
                 'iucn': iucn if iucn else '',
                 'iucn_code': iucn_code if iucn_code else '',
-                'iucn_full_name': iucn_full_name if iucn_full_name else ''
+                'iucn_full_name': iucn_full_name if iucn_full_name else '',
+                'status_species': status_species if status_species else '',
+                'native_range': native_range_text if native_range_text else '',
             })
 
     except:
-        raise ValueError
+        # raise ValueError
+        continue
     
 driver.quit()
 
